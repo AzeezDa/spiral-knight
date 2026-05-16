@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spiral Knight</title>
+    <style>
+        #output {
+            width: 100%;
+            max-width: 80vh;
+            aspect-ratio: 1/1;
+            padding: 8px;
+            margin: auto;
+            margin-bottom: 16px;
+            display: block;
+            image-rendering: pixelated;
+        }
+
+        .center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: auto;
+        }
+    </style>
+    <script src="script.js" type="module"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+</head>
+
+<body>
+    <canvas id="output"></canvas>
+
+    <div class="grid" style="margin:16px">
+        <div class="center" id="status">
+            Status: Done
+        </div>
+        <button id="draw">Draw</button>
+        <div class="center">
+            <p data-tooltip="Redraw when any change is made">Auto Draw: <input type="checkbox" id="auto draw" checked />
+            </p>
+        </div>
+    </div>
+
+    <div style="display:flex" class="container">
+        <div class="center" style="width:10vw">
+            <p data-tooltip="Number of pixels per column">Size:</p>
+        </div> <input type="number" min="100" value="100" id="size input">
+    </div>
+
+    <div class="container grid">
+        <div class="center">
+            <p data-tooltip="Knight number">Knight #</p>
+        </div>
+        <div class="center">
+            <p data-tooltip="Horizontal displacement">Δx</p>
+        </div>
+        <div class="center">
+            <p data-tooltip="Vertical displacement">Δy</p>
+        </div>
+        <div class="center">
+            <p data-tooltip="Colour of the knight">Colour</p>
+        </div>
+    </div>
+
+    <div id="knights">
+
+    </div>
+
+    <main class="container">
+
+        <h1>Information</h1>
+
+        <p>This tool displays chessboard when knight(-like) pieces are placed on an Ulam spiral such that no piece is
+            threatened by a previously placed piece. See <a href="https://youtu.be/UiX4CFIiegM">the corresponding video
+                by Numberphile</a> for more details.</p>
+
+        <h2>Help</h2>
+        <p>A knight with Δx = Δy = 0 is disregarded from the drawing; it will never be placed on the board. Note that
+            exchanging Δx and Δy will not change the knight's behaviour (due to symmetry).</p>
+
+        <p>The <em>size</em> of the drawing the is number of pixels in every column of the image. The size may also be
+            changed using the <em>Size</em> input above.</p>
+
+        <p> Hold shift and (mouse) scroll on the image to zoom and in about. By default, any change will redraw the
+
+            image; this behaviour can be changed by ticking off the <em>Auto Draw</em> checkbox </p>
+        <p>Press <em>R</em> to reset all settings to their default values. Press <em>Z</em> to set the zoom to minimum
+            (size =
+            50), and <em>Shift+Z</em> to set it to maximum (size = 1500).</p>
+
+        <p><span style="color:red"><b>Warning:</b></span> Larger sizes take longer to draw. Therefore, it is recommended
+            that you
+            disable Auto Draw when you want to draw larger checkboards to avoid redrawing on every update.</p>
+
+    </main>
+
+
+</body>
+
+</html>
