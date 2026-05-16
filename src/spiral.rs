@@ -1,23 +1,31 @@
-use std::{
-    ops::{Index, IndexMut},
-};
+use std::ops::{Index, IndexMut};
+
+/// We use bit operations to model threatening and occupying a board. The [[CellValue]] below can
+/// be changed to u16, u32, u64, u128, and [[MAX_KNIGHTS]] to the corresponding width of the type
+/// in order to get more knights (but this will use more memory).
 
 type CellValue = u8;
-const OCCUPIED: CellValue = 1;
-pub const MAX_KNIGHTS: CellValue = 7;
-const EMPTY: CellValue = 0;
+pub const MAX_KNIGHTS: CellValue = 8;
+pub const EMPTY: CellValue = 0;
 
+/// A cell on a the checkboard is modelled as two bytes: the first indicates which team (colour) is
+/// occupying that cell, and the second indicates which team is threatening that cell.
+///
+/// The occupier byte is either 0 (no occupier) or 1 at exactly one bit-index (that index is
+/// occupying that cell).
+///
+/// The threatener byte can is a bit-vector indicating which teams are threatening that cell.
 #[derive(Clone, Copy)]
 pub struct Cell {
     occupier: CellValue,
-    cell: CellValue,
+    threatener: CellValue,
 }
 
 impl Cell {
     pub fn new() -> Self {
         Self {
-            occupier: 0,
-            cell: 0,
+            occupier: EMPTY,
+            threatener: EMPTY,
         }
     }
 
@@ -25,51 +33,73 @@ impl Cell {
         debug_assert!(index <= MAX_KNIGHTS);
         debug_assert!(self.can_occupy(index));
         debug_assert!(!self.unoccupiable());
-        let team = Self::index_to_team(index);
-        self.occupier = team;
-        self.cell |= OCCUPIED | team; // Occupy and paint cell
+        let team_bit = 1 << index;
+        self.occupier = team_bit; // Occupy
+        self.threatener |= team_bit; // Threaten cell
     }
 
     fn is_occupied(&self) -> bool {
-        self.cell & OCCUPIED == OCCUPIED
+        self.occupier != EMPTY
     }
 
     fn unoccupiable(&self) -> bool {
         // Occupied or threatened by >1 knight
-        self.is_occupied() || self.cell.count_ones() > 1
+        self.is_occupied() || self.threatener.count_ones() > 1
     }
 
     fn can_occupy(&self, index: CellValue) -> bool {
         debug_assert!(index <= MAX_KNIGHTS);
-        let team = Self::index_to_team(index);
-        !self.is_occupied() & ((self.cell == EMPTY) | (self.cell ^ team == EMPTY))
+        let team_bit = 1 << index;
+        // Cell is not occupied and either empty or threatened by a friendly piece
+        !self.is_occupied() & ((self.threatener == EMPTY) | (self.threatener ^ team_bit == EMPTY))
     }
 
     fn threaten(&mut self, index: CellValue) {
         debug_assert!(index <= MAX_KNIGHTS);
-        let team = Self::index_to_team(index);
-        self.cell |= team;
+        let team_bit = 1 << index;
+        self.threatener |= team_bit;
     }
 
     pub fn to_colour(&self, colours: &[(u8, u8, u8)]) -> (u8, u8, u8) {
         match self.occupier {
-            0b00000010 => colours[0], // Red
-            0b00000100 => colours[1], // Black
-            0b00001000 => colours[2], // Cyan
-            0b00010000 => colours[3], // Green
-            0b00100000 => colours[4], // Violet
-            0b01000000 => colours[5], // Orange
-            0b10000000 => colours[6], // Blue
-            _ => (255, 255, 255),     // White
+            0b00000001 => colours[0],
+            0b00000010 => colours[1],
+            0b00000100 => colours[2],
+            0b00001000 => colours[3],
+            0b00010000 => colours[4],
+            0b00100000 => colours[5],
+            0b01000000 => colours[6],
+            0b10000000 => colours[7],
+            _ => (255, 255, 255), // Empty or unoccupiable cells are coloured white
         }
-    }
-
-    fn index_to_team(index: CellValue) -> CellValue {
-        debug_assert!(index <= MAX_KNIGHTS);
-        1 << (index + 1)
     }
 }
 
+/// Transforms a natural number to its corresponding place on the Ulam spiral (on which the pieces
+/// are placed). This takes advantage of the fact that perfect squares lay on the upper left and
+/// bottom right diagonals of the Ulam
+/// spiral.
+///
+/// In summary, we find the square root of the input n to find which "ring" of the spiral need to
+/// be on. Thereafter, based on which diagonal corner (called anchor) we are closest to, we add the
+/// corresponding displacement based on that anchor to get the coordinate for n.
+///
+/// For example, if we want to compute the position for 18, we take the square root to get that 4
+/// is closest square root (floored) which will lay on (-4/2, 4/2). Since 18 lay on the first half
+/// of the interval [4^2, 5^2], we add (0, -4^2 - 18) = (0, -2) to the anchor corner to get the
+/// corresponding coordinate. The other three cases are left to the reader as an exercise :^)
+///
+/// 36--35--34--33--32--31--30
+///                         |
+///     16--15--14--13--12  29
+///     |               |   |
+///     17  4---3---2   11  28
+///     |   |       |   |   |
+///     18  5   0---1   10  27
+///     |   |           |   |
+///     19  6---7---8---9   26
+///     |                   |
+///     20--21--22--23--24--25
 fn ulam(n: usize) -> (i32, i32) {
     let n = n as i32;
     let sqrtn = (n as f64).sqrt() as i32;
@@ -99,7 +129,7 @@ fn ulam(n: usize) -> (i32, i32) {
 }
 
 pub struct SpiralGrid {
-    size: usize,
+    size: usize, // Number of rows or pixels per column
     grid: Vec<Cell>,
 }
 
@@ -111,6 +141,8 @@ impl SpiralGrid {
         }
     }
 
+    /// Transforms a coordinate from the standard Euclidean system with origin in the middle
+    /// to an array based coordinate system where the origin is on the top left corner.
     fn transform(&self, x: i32, y: i32) -> (usize, usize) {
         (
             (self.size as i32 / 2 - y) as usize,
@@ -122,16 +154,18 @@ impl SpiralGrid {
         self.size * self.size + self.size
     }
 
-    pub fn with_in_bounds(&self, x: i32, y: i32) -> bool {
+    pub fn within_bounds(&self, x: i32, y: i32) -> bool {
         let (x, y) = self.transform(x, y);
         (x < self.size) & (y <= self.size)
     }
 
+    // Get the cell at the given coordinate given in standard Euclidean
     pub fn at(&self, (x, y): (i32, i32)) -> &Cell {
         let (x, y) = self.transform(x, y);
         &self[(x, y)]
     }
 
+    // Get the cell as mutable at the given coordinate given in standard Euclidean
     pub fn at_mut(&mut self, (x, y): (i32, i32)) -> &mut Cell {
         let (x, y) = self.transform(x, y);
         &mut self[(x, y)]
@@ -163,18 +197,24 @@ pub fn place_knights(size: usize, knights: &[(i32, i32)]) -> SpiralGrid {
     let mut n = 0;
 
     while n < grid.max_n() {
+        // Can't place on unoccupiable cells: those that are threatened by more than 1
+        // different-teamed pieces or those that are occupied. Thus, we skip them.
         if grid.at(ulam(n)).unoccupiable() {
             n += 1;
         } else {
-            let (knight_index, (delta_x, delta_y)) = turn_iterator
+            let (team_index, (delta_x, delta_y)) = turn_iterator
                 .next()
                 .map(|(a, (b, c))| (a as u8, (*b, *c)))
                 .unwrap();
+
+            // Find a cell to place the knight on
             for n_to_try in n..grid.max_n() {
                 let coords @ (x, y) = ulam(n_to_try);
                 let cell = grid.at_mut(coords);
-                if cell.can_occupy(knight_index) {
-                    cell.occupy(knight_index);
+                if cell.can_occupy(team_index) {
+                    cell.occupy(team_index);
+
+                    // Threaten cells based on movements
                     for (delta_x, delta_y) in [
                         (delta_x, delta_y),
                         (-delta_x, delta_y),
@@ -186,8 +226,8 @@ pub fn place_knights(size: usize, knights: &[(i32, i32)]) -> SpiralGrid {
                         (-delta_y, -delta_x),
                     ] {
                         let target = (x + delta_x, y + delta_y);
-                        if grid.with_in_bounds(target.0, target.1) {
-                            grid.at_mut(target).threaten(knight_index);
+                        if grid.within_bounds(target.0, target.1) {
+                            grid.at_mut(target).threaten(team_index);
                         }
                     }
                     break;

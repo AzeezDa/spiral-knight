@@ -7,6 +7,7 @@ use web_sys::{CanvasRenderingContext2d, HtmlCanvasElement, HtmlInputElement, Ima
 
 use crate::spiral::MAX_KNIGHTS;
 
+// Used for debug purposes
 #[wasm_bindgen]
 extern "C" {
     fn alert(message: &str);
@@ -17,6 +18,8 @@ extern "C" {
 #[wasm_bindgen]
 pub fn draw(size: usize) -> Result<(), JsValue> {
     let document = web_sys::window().unwrap().document().unwrap();
+
+    // Get canvas to draw on
     let canvas = document
         .get_element_by_id("output")
         .unwrap()
@@ -29,6 +32,7 @@ pub fn draw(size: usize) -> Result<(), JsValue> {
         .dyn_into::<CanvasRenderingContext2d>()
         .unwrap();
 
+    // Get activate (non (0, 0)) knights and their colours.
     let mut knights = vec![];
     let mut colours = vec![];
     for i in 1..=MAX_KNIGHTS {
@@ -62,18 +66,19 @@ pub fn draw(size: usize) -> Result<(), JsValue> {
         }
     }
 
-    let spiral = spiral::place_knights(size, &knights);
+    let grid = spiral::place_knights(size, &knights);
+
     let width = size + 1;
     let height = size;
+    let mut backbuffer = vec![0u8; width * height * 4];
 
     canvas.set_width(width as u32);
     canvas.set_height(height as u32);
 
-    let mut backbuffer = vec![0u8; width * height * 4];
-
+    // Draw the image on the buffer then update the canvas
     backbuffer
         .par_chunks_mut(4)
-        .zip(spiral.grid().par_iter())
+        .zip(grid.grid().par_iter())
         .for_each(|(buffer, cell)| {
             let (r, g, b) = cell.to_colour(&colours);
             buffer[0] = r;

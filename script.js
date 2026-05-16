@@ -84,7 +84,7 @@ init().then(() => {
         if (e.key == "r") {
             size = DEFAULT_SIZE
             size_input().value = DEFAULT_SIZE
-            for (let index = 1; index < get_max_knights(); index++) {
+            for (let index = 1; index <= get_max_knights(); index++) {
                 let name = `Knight ${index}`;
                 let dx = DEFAULT_REST_KNIGHTS[0];
                 let dy = DEFAULT_REST_KNIGHTS[1];

@@ -50,7 +50,7 @@
 
     <div class="container grid">
         <div class="center">
-            <p data-tooltip="Knight number">Knight #</p>
+            <p data-tooltip="Knight's team number">Knight #</p>
         </div>
         <div class="center">
             <p data-tooltip="Horizontal displacement">Δx</p>
@@ -72,26 +72,35 @@
         <h1>Information</h1>
 
         <p>This tool displays chessboard when knight(-like) pieces are placed on an Ulam spiral such that no piece is
-            threatened by a previously placed piece. See <a href="https://youtu.be/UiX4CFIiegM">the corresponding video
-                by Numberphile</a> for more details.</p>
+            threatened by a previously placed piece. See the corresponding <a href="https://youtu.be/UiX4CFIiegM">video
+                by Numberphile</a> as well as the <a href="https://youtu.be/VgmDuBCayPw">extra video</a> for more
+            details.</p>
 
         <h2>Help</h2>
         <p>A knight with Δx = Δy = 0 is disregarded from the drawing; it will never be placed on the board. Note that
             exchanging Δx and Δy will not change the knight's behaviour (due to symmetry).</p>
 
-        <p>The <em>size</em> of the drawing the is number of pixels in every column of the image. The size may also be
-            changed using the <em>Size</em> input above.</p>
+        <p>The <em>size</em> of the drawing the is number of pixels in every column of the image. </p>
 
-        <p> Hold shift and (mouse) scroll on the image to zoom and in about. By default, any change will redraw the
+        <p> Hold shift and (mouse) scroll on the image to zoom and in about. The size may also be changed using the
+            <em>Size</em> input above. By default, any change will redraw the image; this behaviour can be changed by
+            ticking
+            off the <em>Auto Draw</em> checkbox
+        </p>
 
-            image; this behaviour can be changed by ticking off the <em>Auto Draw</em> checkbox </p>
         <p>Press <em>R</em> to reset all settings to their default values. Press <em>Z</em> to set the zoom to minimum
             (size =
             50), and <em>Shift+Z</em> to set it to maximum (size = 1500).</p>
 
+        <p>You can save the drawing by right-clicking and saving!</p>
+
+        <p><span style="color:cyan"><b>Note:</b></span> That two pieces have the same colour does not imply that they do not
+            threaten each other. Instead, it simply means that the piece's cells will be coloured with the given colour; it is
+            the knight's number that indicate which "team" it belongs to.</p>
+
         <p><span style="color:red"><b>Warning:</b></span> Larger sizes take longer to draw. Therefore, it is recommended
             that you
-            disable Auto Draw when you want to draw larger checkboards to avoid redrawing on every update.</p>
+            disable Auto Draw when you want to draw larger checkboards to avoid redrawing on every update. In fact, that is why the size has an upper limit.</p>
 
     </main>
 
