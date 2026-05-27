@@ -29,6 +29,9 @@
 </head>
 
 <body>
+    <div class="grid"><a href="#help" class="center"> Help</a>
+        <a href="https://github.com/AzeezDa/spiral-knight" target="_blank" class="center"> Source Code</a>
+    </div>
     <canvas id="output"></canvas>
 
     <div class="grid" style="margin:16px">
@@ -44,8 +47,8 @@
 
     <div style="display:flex" class="container">
         <div class="center" style="width:10vw">
-            <p data-tooltip="Number of pixels per column">Size:</p>
-        </div> <input type="number" min="100" value="100" id="size input">
+            <p data-tooltip="Number of steps of the spiral">Size:</p>
+        </div> <input type="number" min="1" id="size input">
     </div>
 
     <div class="container grid">
@@ -71,36 +74,68 @@
 
         <h1>Information</h1>
 
-        <p>This tool displays chessboard when knight(-like) pieces are placed on an Ulam spiral such that no piece is
-            threatened by a previously placed piece. See the corresponding <a href="https://youtu.be/UiX4CFIiegM">video
-                by Numberphile</a> as well as the <a href="https://youtu.be/VgmDuBCayPw">extra video</a> for more
-            details.</p>
-
-        <h2>Help</h2>
-        <p>A knight with Δx = Δy = 0 is disregarded from the drawing; it will never be placed on the board. Note that
-            exchanging Δx and Δy will not change the knight's behaviour (due to symmetry).</p>
-
-        <p>The <em>size</em> of the drawing the is number of pixels in every column of the image. </p>
-
-        <p> Hold shift and (mouse) scroll on the image to zoom and in about. The size may also be changed using the
-            <em>Size</em> input above. By default, any change will redraw the image; this behaviour can be changed by
-            ticking
-            off the <em>Auto Draw</em> checkbox
+        <p>
+            This tool displays chessboard when knight(-like) pieces are placed on an Ulam spiral such that no piece is
+            threatened by a previously placed piece. See the corresponding by
+            <a href="https://youtu.be/UiX4CFIiegM" target="_blank">Numberphile</a>,
+            the <a href="https://youtu.be/VgmDuBCayPw" target="_blank"> extra video</a>,
+            and <a href="https://oeis.org/A392177" target="_blank">A392177</a> on OEIS for more details.
         </p>
 
-        <p>Press <em>R</em> to reset all settings to their default values. Press <em>Z</em> to set the zoom to minimum
-            (size =
-            50), and <em>Shift+Z</em> to set it to maximum (size = 1500).</p>
+        <h2 id="help">Help</h2>
+        <p>
+            A knight with Δx = Δy = 0 is disregarded from the drawing;
+            it will never be placed on the board.
+            Note that exchanging Δx and Δy will not change the knight's behaviour (due to symmetry).
+        </p>
 
-        <p>You can save the drawing by right-clicking and saving!</p>
+        <p>
+            The <em>Size</em> of the drawing is the number of steps the spiral is built off.
+            However, the drawn image will use the next smallest integer such that the spiral makes up
+            a rectangle.
+        </p>
 
-        <p><span style="color:cyan"><b>Note:</b></span> That two pieces have the same colour does not imply that they do not
-            threaten each other. Instead, it simply means that the piece's cells will be coloured with the given colour; it is
-            the knight's number that indicate which "team" it belongs to.</p>
+        <p>
+            Hold shift and (mouse) scroll on the image to zoom and in about.
+            The size may also be changed using the <em>Size</em> input above.
+            By default, any change will redraw the image;
+            this behaviour can be changed by ticking off the <em>Auto Draw</em> checkbox
+        </p>
 
-        <p><span style="color:red"><b>Warning:</b></span> Larger sizes take longer to draw. Therefore, it is recommended
-            that you
-            disable Auto Draw when you want to draw larger checkboards to avoid redrawing on every update. In fact, that is why the size has an upper limit.</p>
+        <p>
+            Press <em>R</em> to reset all settings to their default values.
+            Press <em>Z</em> to set the zoom to minimum.
+        </p>
+
+        <p>
+            Save the drawing by right-clicking and saving!
+        </p>
+
+        <p>
+            Click on the ↓ buttons beside every knight to download their corresponding sequence up to the given
+            size in the <em>Size</em> input.
+            The ↓ beside the <em>Empty Cells</em> downloads the sequence of the empty (unoccupied) cells.
+            These sequences are the numbers on the spiral that the knight (or no one if empty) occupies,
+            starting from 0.
+            For example, using the default settings, Knight 1's sequence is
+            <a href="https://oeis.org/A392177" target="_blank">A392177</a>;
+            Knight 2's sequence is <a href="https://oeis.org/A392178" target="_blank">A392178</a>; and
+            <a href="https://oeis.org/A392179" target="_blank">A392179</a> is the empty's cells.
+        </p>
+
+        <p>
+            <span style="color:cyan"><b>Note:</b></span>
+            That two pieces have the same colour does not imply that they do not threaten each other.
+            Instead, it simply means that the piece's cells will be coloured with the given colour;
+            it is the knight's number that indicate which "team" it belongs to.
+        </p>
+
+        <p>
+            <span style="color:red"><b>Warning:</b></span> Larger sizes take longer to draw.
+            Therefore,
+            it is recommended that you disable Auto Draw when you want to draw larger checkboards to avoid redrawing on
+            every update.
+        </p>
 
     </main>
 

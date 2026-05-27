@@ -1,7 +1,7 @@
 [package]
 name = "spiral_knight"
 version = "0.1.0"
-authors = ["AzeezDa <azeez.daoud3@gmail.com>"]
+authors = ["AzeezDa"]
 edition = "2018"
 
 [lib]
@@ -14,6 +14,8 @@ default = ["console_error_panic_hook"]
 wasm-bindgen = "0.2.84"
 web-sys = { version = "0.3", features = ["Window", "Document", "HtmlCanvasElement", "CanvasRenderingContext2d", "ImageData", "HtmlInputElement"] }
 rayon = "1.12.0"
+lazy_static = "1.5.0"
+itertools = "0.14.0"
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

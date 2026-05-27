@@ -61,16 +61,24 @@ impl Cell {
     }
 
     pub fn to_colour(&self, colours: &[(u8, u8, u8)]) -> (u8, u8, u8) {
+        if let Some(knight) = self.occupied_by() {
+            colours[knight - 1]
+        } else {
+            (255, 255, 255)
+        }
+    }
+
+    pub fn occupied_by(&self) -> Option<usize> {
         match self.occupier {
-            0b00000001 => colours[0],
-            0b00000010 => colours[1],
-            0b00000100 => colours[2],
-            0b00001000 => colours[3],
-            0b00010000 => colours[4],
-            0b00100000 => colours[5],
-            0b01000000 => colours[6],
-            0b10000000 => colours[7],
-            _ => (255, 255, 255), // Empty or unoccupiable cells are coloured white
+            0b00000001 => Some(1),
+            0b00000010 => Some(2),
+            0b00000100 => Some(3),
+            0b00001000 => Some(4),
+            0b00010000 => Some(5),
+            0b00100000 => Some(6),
+            0b01000000 => Some(7),
+            0b10000000 => Some(8),
+            _ => None,
         }
     }
 }
@@ -128,15 +136,19 @@ fn ulam(n: usize) -> (i32, i32) {
     }
 }
 
+#[derive(Clone)]
 pub struct SpiralGrid {
-    size: usize, // Number of rows or pixels per column
+    height: usize, // Number of rows or pixels per column
+    spiral_size: usize,
     grid: Vec<Cell>,
 }
 
 impl SpiralGrid {
-    pub fn new(size: usize) -> Self {
+    pub fn new(n: usize) -> Self {
+        let size = (n as f64).sqrt() as usize;
         Self {
-            size,
+            height: size,
+            spiral_size: n,
             grid: vec![Cell::new(); (size + 1) * size],
         }
     }
@@ -145,18 +157,18 @@ impl SpiralGrid {
     /// to an array based coordinate system where the origin is on the top left corner.
     fn transform(&self, x: i32, y: i32) -> (usize, usize) {
         (
-            (self.size as i32 / 2 - y) as usize,
-            (x + self.size as i32 / 2) as usize,
+            (self.height as i32 / 2 - y) as usize,
+            (x + self.height as i32 / 2) as usize,
         )
     }
 
     pub fn max_n(&self) -> usize {
-        self.size * self.size + self.size
+        self.height * self.height + self.height
     }
 
     pub fn within_bounds(&self, x: i32, y: i32) -> bool {
         let (x, y) = self.transform(x, y);
-        (x < self.size) & (y <= self.size)
+        (x < self.height) & (y <= self.height)
     }
 
     // Get the cell at the given coordinate given in standard Euclidean
@@ -174,11 +186,21 @@ impl SpiralGrid {
     pub fn grid(&self) -> &[Cell] {
         &self.grid
     }
+
+    pub fn spiral_iterator<'a>(&'a self) -> impl Iterator<Item = &'a Cell> {
+        (0..self.max_n())
+            .map(move |n| self.at(ulam(n)))
+            .take(self.spiral_size)
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
+    }
 }
 
 impl IndexMut<(usize, usize)> for SpiralGrid {
     fn index_mut(&mut self, (r, c): (usize, usize)) -> &mut Self::Output {
-        &mut self.grid[r * (self.size + 1) + c]
+        &mut self.grid[r * (self.height + 1) + c]
     }
 }
 
@@ -186,7 +208,7 @@ impl Index<(usize, usize)> for SpiralGrid {
     type Output = Cell;
 
     fn index(&self, (r, c): (usize, usize)) -> &Self::Output {
-        &self.grid[r * (self.size + 1) + c]
+        &self.grid[r * (self.height + 1) + c]
     }
 }
 
